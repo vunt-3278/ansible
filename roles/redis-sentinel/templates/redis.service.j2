@@ -1,0 +1,15 @@
+[Unit]
+Description=Redis In-Memory Data Store
+After=network.target
+
+[Service]
+#Type=forking
+User={{ redis_user }}
+Group={{ redis_user }}
+ExecStart=/usr/local/bin/redis-server /etc/redis/redis.conf
+ExecStop=/usr/local/bin/redis-cli shutdown
+Restart=always
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

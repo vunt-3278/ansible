@@ -1,0 +1,15 @@
+[Unit]
+Description=Redis Sentinel
+After=network.target
+
+[Service]
+User={{ redis_user }}
+Group={{ redis_user }}
+ExecStart=/usr/local/bin/redis-sentinel /etc/redis/redis-sentinel.conf
+ExecStop=/usr/local/bin/redis-sentinel shutdown
+#Type=forking
+Restart=always
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

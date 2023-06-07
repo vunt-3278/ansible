@@ -1,8 +1,8 @@
-- name: BASE > Install aptitude
-  apt:
-    name: aptitude
-    state: present
-  become: yes
+# - name: BASE > Install aptitude
+#   apt:
+#     name: aptitude
+#     state: present
+#   become: yes
 
 - name: BASE > Add the {{ deploy_user }} user
   user:
