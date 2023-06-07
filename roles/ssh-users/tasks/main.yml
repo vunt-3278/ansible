@@ -1,0 +1,38 @@
+- name: SSH-USER > Create ssh user
+  user:
+    name: "{{ item.user_name }}"
+    groups: "{{ item.groups_name }}"
+    shell: /bin/bash
+    append: yes
+    createhome: yes
+  loop: "{{ user_lists }}"
+  become: yes
+
+- name: SSH-USER > Create folder .ssh
+  file:
+    path: /home/{{ item.user_name }}/.ssh
+    state: directory
+    owner: "{{ item.user_name }}"
+    group: "{{ item.user_name }}"
+    mode: 0700
+  loop: "{{ user_lists }}"
+  become: yes
+
+- name: SSH-USER > Configuring authorized_keys
+  copy:
+    content: "{{ item.authorized_keys }}"
+    dest: /home/{{ item.user_name }}/.ssh/authorized_keys
+    owner: "{{ item.user_name }}"
+    group: "{{ item.user_name }}"
+    mode: 0600
+  loop: "{{ user_lists }}"
+  become_user: '{{ item.user_name }}'
+  become: yes
+
+- name: SSH-USER > Allow sudo without PASSWD
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ item.user_name }} ALL=(ALL) NOPASSWD:ALL"
+    validate: 'visudo -cf %s'
+  loop: "{{ user_lists }}"
+  become: yes

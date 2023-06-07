@@ -1,0 +1,5 @@
+user_lists:
+  # Dev User
+  - { user_name: "thevu", groups_name: "sudo" , authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFuEq8Gl8pajwN4uqUCVaWjfhhM+ItQIHnncanVcNWcfUEB1BTl0uMfd7/zKqQl2KpqdhiSl+H6tYs80sLEftpIsnWpFPMbJZMRHfgXVlj3cuDWQLQFsfzP5ZZj4cJCgQuZ3p7ngwdpI7JYAKz9Devs/xMMK1WW+zsoV7aPeDmUrlkI+aPka3Mrq3kQ8GMGONhG67IxdmSFZyaV8k8VQvyEgZv/KKjlP/nPK1iMwM4o5fiK0dwRHstKh8KHgyUWni8EPY2vSGiXBeZOpuM0UVZz4h6MnGJgWCGj5QbNUcV62rGz3zYWEFZOS1dgt0Tq19ElehO/CH8WwsyYVTbVPYhixUh1HglpOiX7XFKav7LBhSkmw3UPLL5vktlIglS4sltID8tymBNkDZ3i5/gjxzgJv7ALWIz1WflW9wdssLfSjuohd8SaM1FlHKggrye0yTH7BHJCjee6dWc1Y7s2rYlaWx7VX0nK7m3XB38LoehUyYZo9sBMOkIloHt5fMaqz8= thevu@B123278-LT" }
+  # Infra User
+  # - { user_name: "infra-user-02", groups_name: "sudo" , authorized_keys: "" }

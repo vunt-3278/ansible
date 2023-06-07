@@ -1,0 +1,10 @@
+{{ app_path_project }}/shared/log/*.log {
+    daily
+    rotate 7
+    dateext
+    missingok
+    compress
+    copytruncate
+    su {{ deploy_user }} {{ deploy_user }}
+    sharedscripts
+}

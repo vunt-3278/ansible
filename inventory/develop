@@ -1,0 +1,15 @@
+[tag_Role_ruby]
+13.213.60.152  ansible_user=ec2-user 
+; 192.168.153.126 ansible_user=thevu 
+
+[tag_Role_php]
+13.213.60.152  ansible_user=ec2-user
+; 192.168.153.126 ansible_user=thevu
+
+[tag_Role_node]
+13.213.60.152  ansible_user=ec2-user
+; 192.168.153.126 ansible_user=thevu
+
+[tag_Env_dev:children]
+rpmtag_Role_ruby
+tag_Role_node

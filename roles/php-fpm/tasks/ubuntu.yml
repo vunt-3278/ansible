@@ -1,0 +1,90 @@
+- name: PHP-FPM > Install PPA repo for Ubuntu target
+  apt_repository:
+    repo: "{{ php_repo }}"
+    state: present
+  become: yes
+
+- name: PHP-FPM > Install PHP-FPM {{ php_version }} for Ubuntu
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ php_packages }}"
+  become: yes
+
+- name: PHP-FPM > Stop service apache2
+  systemd:
+    name: apache2
+    state: stopped
+  become: yes
+
+- name: PHP-FPM > Disable service apache2
+  systemd:
+    name: apache2
+    enabled: no
+  become: yes
+
+- name: PHP-FPM > Create path project
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0775
+  loop:
+    - "{{ app_path_project }}"
+    - "{{ app_path_project }}/shared"
+  become: yes
+
+- name: PHP-FPM > Install Composer
+  shell: |
+    curl -s https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer
+  become: yes
+
+- name: PHP-FPM > Install Deployer
+  shell: |
+    curl -LO https://deployer.org/deployer.phar
+    mv deployer.phar /usr/local/bin/dep
+    chmod +x /usr/local/bin/dep
+  become: yes
+
+- name: PHP-FPM > Change user/group pool
+  lineinfile:
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - regexp: "^user =(.*)$"
+      line: "user = {{ deploy_user }}"
+    - regexp: "^group =(.*)$"
+      line: "group = {{ deploy_user }}"
+    - regexp: "^listen.owner =(.*)$"
+      line: "listen.owner = {{ deploy_user }}"
+    - regexp: "^listen.group =(.*)$"
+      line: "listen.group = {{ deploy_user }}"
+    - regexp: "^;(listen.mode = 0660)"
+      line: "listen.mode = 0660"
+  become: yes
+
+- name: PHP-FPM > Modifier pool.d/www/conf
+  lineinfile:
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    backrefs: yes
+  loop:
+    - regexp: '^;(php_flag\[display_errors\] = off)'
+      line: "php_flag[display_errors] = off"
+    - regexp: '^;(php_admin_value\[error_log\] = \/var\/log\/fpm-php.www.log)'
+      line: "php_admin_value[error_log] = /var/log/fpm-php.www.log"
+    - regexp: '^;(php_admin_flag\[log_errors\] = on)'
+      line: "php_admin_flag[log_errors] = on"
+    - regexp: ';(php_admin_value\[memory_limit\] = (.*)$)'
+      line: "php_admin_value[memory_limit] = 128M"
+  become: yes
+
+- name: PHP-FPM > Restart PHP-FPM after modifier
+  service:
+    name: php{{ php_version }}-fpm
+    state: restarted
+  become: yes

@@ -1,0 +1,5 @@
+# Variable using all roles
+project: "suncd"
+env: dev
+# User deploy
+deploy_user: deploy

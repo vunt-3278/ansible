@@ -1,0 +1,13 @@
+[tag_Role_ruby]
+ruby_host_ip
+
+[tag_Role_php]
+php_host_ip
+
+[tag_Role_node]
+node_host_ip
+
+[tag_Env_stg:children]
+tag_Role_php
+tag_Role_ruby
+tag_Role_node

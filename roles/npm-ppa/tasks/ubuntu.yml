@@ -1,0 +1,17 @@
+# Install nodejs & npm from PPA
+- name: NPM-PPA > Get script
+  get_url:
+    url: "https://deb.nodesource.com/setup_{{ nodejs_setup_version }}.x"
+    dest: "/home/{{ deploy_user }}/nodesource_setup.sh"
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: NPM-PPA > Run script
+  shell: bash /home/{{ deploy_user }}/nodesource_setup.sh
+  become: yes
+
+- name: NPM-PPA > Install nodejs
+  apt:
+    name: nodejs
+    update_cache: yes
+  become: yes

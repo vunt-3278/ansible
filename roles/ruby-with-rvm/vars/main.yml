@@ -1,0 +1,34 @@
+#roles/ruby-with-rvm
+rvm_temp_download_path: "/tmp"
+rvm_default_ruby_version: "{{ rvm_rubies | last if rvm_rubies and rvm_rubies is iterable else rvm_rubies }}"
+rvm_rvm: "{{ rvm_install_path }}/bin/rvm"
+bundler_version: 2.0.2
+rvm_symlink_binaries:
+  - "erb"
+  - "executable-hooks-uninstaller"
+  - "gem"
+  - "irb"
+  - "rake"
+  - "rdoc"
+  - "ri"
+  - "ruby"
+rvm_symlink_bundler_binaries:
+  - "bundle"
+  - "bundler"
+rvm_symlink_to: "/usr/local/bin"
+rvm_rubies:
+  - "ruby-2.7"
+rvm_bundler_install: True
+rvm_delete_ruby:
+rvm_install_path: "~/.rvm"
+rvm_install_flags: "--auto-dotfiles --user-install"
+rvm_ruby_install_flags:
+rvm_rvm_latest_installer: "https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer"
+rvm_rvm_version: "stable"
+rvm_rvm_check_for_updates: True
+rvm_gpg_keys: "409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB"
+rvm_gpg_key_servers:
+  - hkps://keys.openpgp.org
+  - hkp://keyserver.ubuntu.com
+  - hkp://keyserver.pgp.com
+rvm_autolib_mode: 3

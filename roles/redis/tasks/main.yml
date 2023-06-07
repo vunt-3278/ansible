@@ -1,0 +1,95 @@
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: Include tasks Nginx trên Amazon Linux 2
+  include_tasks: amazon.yml
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"
+
+- name: REDIS > Download package redis
+  unarchive:
+    src: "{{ redis_url }}"
+    dest: /tmp
+    remote_src: yes
+  become: yes
+
+- name: REDIS > Build redis-server
+  make:
+    chdir: /tmp/redis-{{ redis_version }}
+  become: yes
+
+- name: REDIS > Install redis-server
+  make:
+    chdir: /tmp/redis-{{ redis_version }}
+    target: install
+  become: yes
+
+- name: REDIS > Add the user
+  user:
+    name: "{{ redis_user }}"
+    shell: /bin/false
+    append: yes
+    createhome: no
+  become: yes
+
+- name: REDIS > Create redis directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ redis_user }}"
+    group: "{{ redis_user }}"
+    mode: 0755
+  loop:
+    - /etc/redis
+    - /var/lib/redis
+    - /var/log/redis
+  become: yes
+
+- name: REDIS > Setup redis configure file
+  copy:
+    src: /tmp/redis-{{ redis_version }}/redis.conf
+    dest: /etc/redis/redis.conf
+    remote_src: yes
+  become: yes
+
+- name: REDIS > Set REDIS connect form everywhere ( IF NEED )
+  replace:
+    path: /etc/redis/redis.conf
+    regexp: "bind 127.0.0.1 -::1"
+    replace: "bind 127.0.0.1"
+  become: yes
+
+- name: REDIS > Set directory install DB
+  lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: "^dir ./"
+    line: "dir /var/lib/redis"
+  become: yes
+
+- name: REDIS > Create DB directory
+  file:
+    path: /var/lib/redis
+    state: directory
+    owner: redis
+    group: redis
+    mode: "765"
+  become: yes
+
+- name: REDIS > Config redis service
+  template:
+    src: redis.service.j2
+    dest: "/etc/systemd/system/redis.service"
+    mode: 0755
+  become: yes
+
+- name: REDIS > Restart & Enabled redis.service
+  service:
+    name: redis
+    state: restarted
+    enabled: yes
+  become: yes
+
+- name: REDIS > Check redis status
+  shell: bash -lc "systemctl status redis"
+  register: redis_status
+- debug: var=redis_status.stdout_lines

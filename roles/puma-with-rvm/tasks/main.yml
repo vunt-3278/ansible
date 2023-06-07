@@ -1,0 +1,68 @@
+# Detect and install Puma
+- name: 2. PUMA-WITH-RVM > Detect installed RUBY patch number
+  shell: >
+    {{ rvm_rvm }} list strings | grep {{ item }} | tail -n 1
+  loop: "{{ rvm_rubies }}"
+  changed_when: False
+  register: ruby_patch
+  check_mode: no # Run in normal mode when in --check mode (http://docs.ansible.com/ansible/playbooks_checkmode.html)
+  become_user: "{{ deploy_user }}"
+  become: yes
+- debug: msg="{{ item.stdout_lines | default([]) }}"
+  loop: "{{ ruby_patch.results }}"
+
+- name: 2. PUMA-WITH-RVM > Install puma {{ puma_version }}
+  shell: "{{ rvm_install_path }}/wrappers/{{ item.stdout }}/gem install puma -v '{{ puma_version }}'"
+  loop: "{{ ruby_patch.results }}"
+  register: puma_install
+  become_user: "{{ deploy_user }}"
+  become: yes
+- debug: msg="{{ item.stdout_lines | default([]) }}"
+  loop: "{{ puma_install.results }}"
+
+# Create path project & reload daemon
+- name: 2. PUMA-WITH-RVM > Create path project
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  loop:
+    - "{{ app_path }}"
+    - "{{ app_path_project }}"
+    - "{{ app_path_project }}/releases"
+    - "{{ app_path_project }}/shared"
+    - "{{ app_path_project }}/shared/log"
+    - "{{ app_path_project }}/shared/config"
+    - "{{ app_path_project }}/shared/public"
+    - "{{ app_path_project }}/shared/public/system"
+    - "{{ app_path_project }}/shared/public/uploads"
+    - "{{ app_path_project }}/shared/public/assets"
+    - "{{ app_path_project }}/shared/tmp"
+    - "{{ app_path_project }}/shared/tmp/pids"
+    - "{{ app_path_project }}/shared/tmp/sockets"
+  become: yes
+
+# Create Puma systemd
+- name: 2. PUMA-WITH-RVM > Create puma systemd service (puma.service)
+  template:
+    src: puma.service.j2
+    dest: /etc/systemd/system/puma.service
+    owner: "{{puma_user}}"
+    group: "{{puma_group}}"
+    mode: 0644
+  become: yes
+
+- name: 2. PUMA-WITH-RVM > Create puma systemd service (puma.sh)
+  template:
+    src: puma.sh.j2
+    dest: "{{ app_path_project }}/shared/config/puma.sh"
+    owner: "{{puma_user}}"
+    group: "{{puma_group}}"
+    mode: 0754
+  become: yes
+
+- name: 2. PUMA-WITH-RVM > Reload daemon
+  systemd:
+    daemon_reload: yes
+  become: yes

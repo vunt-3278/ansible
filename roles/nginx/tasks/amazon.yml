@@ -1,0 +1,26 @@
+- name: NGINX > Install nginx
+  shell: amazon-linux-extras install nginx1.12 -y
+
+  # yum:
+  #   name: nginx
+  #   state: present
+  # update_cache: yes
+  become: yes
+
+- name: Create sites-available directory
+  file:
+    path: /etc/nginx/sites-available
+    state: directory
+  become: yes
+
+- name: Create sites-enabled directory
+  file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+  become: yes
+# - name: Install python-pip
+#   yum:
+#     name: python-pip
+#     state: present
+#   # update_cache: yes
+#   become: yes

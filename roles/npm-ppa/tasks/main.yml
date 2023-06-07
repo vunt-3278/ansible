@@ -1,0 +1,26 @@
+# Install nodejs & npm from PPA
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: Include tasks npm-ppa trên Ubuntu 20.04
+  include_tasks: ubuntu.yml
+  when: "'Ubuntu' in os_release.stdout and '22.04' in os_release.stdout"
+
+- name: Include tasks npm-ppa trên Amazon Linux 2
+  include_tasks: amazon.yml
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"
+
+- name: NPM-PPA > Check nodejs version
+  shell: bash -lc "node -v"
+  register: checknodejsver
+  become_user: "{{ deploy_user }}"
+  become: yes
+- debug: var=checknodejsver.stdout_lines
+
+- name: NPM-PPA > Check npm version
+  shell: bash -lc "npm -v"
+  register: checknpmver
+  become_user: "{{ deploy_user }}"
+  become: yes
+- debug: var=checknpmver.stdout_lines

@@ -1,0 +1,20 @@
+- name: HOSTNAME > Change hostname
+  hostname:
+    name: "{{ project }}-{{ type }}-{{ env }}"
+  become: yes
+
+- name: HOSTNAME > Change /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    state: present
+    line: 127.0.0.1 {{ project }}-{{ type }}-{{ env }}
+    regexp: '^(.*)127(.*)$' 
+  become: yes
+
+- name: HOSTNAME > Change preserve_hostname
+  lineinfile: 
+    dest: /etc/cloud/cloud.cfg
+    regexp: '^(.*)preserve_hostname:(.*)$' 
+    line: 'preserve_hostname: true'
+    backrefs: yes
+  become: yes

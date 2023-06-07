@@ -1,0 +1,15 @@
+[Unit]
+Description = puma daemon
+
+[Service]
+#The path to the application code root directory for execute start
+WorkingDirectory = {{ app_path_project }}/current
+
+ExecStart = {{ app_path_project }}/shared/config/puma.sh
+Restart = always
+Type = simple
+User = deploy
+Group = deploy
+
+[Install]
+WantedBy = multi-user.target

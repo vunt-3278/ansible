@@ -1,0 +1,15 @@
+# Install Yarn
+- name: YARN-PPA > Install Yarn
+  npm:
+    name: yarn
+    version: "{{ yarn_version }}"
+    global: yes
+  become: yes
+
+# Check version
+- name: YARN-PPA > Check yarn version
+  shell: bash -lc "yarn -v"
+  register: checkyarnver
+  become_user: "{{ deploy_user }}"
+  become: yes
+- debug: var=checkyarnver.stdout_lines

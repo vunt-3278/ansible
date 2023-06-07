@@ -1,0 +1,11 @@
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: Include tasks PHP trên Ubuntu 20.04
+  include_tasks: ubuntu.yml
+  when: "'Ubuntu' in os_release.stdout and '22.04' in os_release.stdout"
+
+- name: Include tasks PHP trên Amazon Linux 2
+  include_tasks: amazon.yml
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"

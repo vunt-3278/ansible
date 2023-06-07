@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd {{ app_path_project }}/current
+
+/home/deploy/.rvm/bin/rvm default do bundle exec puma -C {{ app_path_project }}/shared/config/puma.rb

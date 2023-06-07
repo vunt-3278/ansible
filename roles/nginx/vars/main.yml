@@ -1,0 +1,18 @@
+nginx_conf_dir: "/etc/nginx"
+server_name: "localhost"
+
+worker_connections: 768
+client_max_body_size: 50M
+cache: "jpg|jpeg|gif|css|png|js|ico"
+server_tokens: "off"
+server_names_hash_bucket_size: 64
+gzip_types: "text/plain application/javascript application/x-javascript text/javascript text/xml text/css"
+log_format_name: nginx_custom
+
+keepalive_timeout: 65
+types_hash_max_size: 2048
+send_timeout: 600
+client_body_timeout: 600
+client_header_timeout: 600
+proxy_send_timeout: 600
+proxy_read_timeout: 600

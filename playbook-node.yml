@@ -1,0 +1,27 @@
+- hosts: tag_Role_node
+
+  become_method: sudo
+
+  # pre_tasks:
+  #   - name: Check OS distribution condition
+  #     debug:
+  #       var: "{{ item }}"
+  #     loop:
+  #       - ansible_distribution
+  #       - ansible_distribution_version
+  #     failed_when:
+  #       - ansible_distribution != 'Amazon'
+
+  roles:
+    - base
+    - aws-cli
+    - hostname
+    - distribute-key
+    - nginx
+    - redis
+    - npm-ppa
+    - yarn-ppa
+    - pm2-ppa
+    - mysql-server
+    - mysql-client
+    - logrotate

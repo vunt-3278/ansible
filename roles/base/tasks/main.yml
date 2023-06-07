@@ -1,0 +1,61 @@
+- name: BASE > Add the {{ deploy_user }} user
+  user:
+    name: "{{ deploy_user }}"
+    groups: adm
+    state: present
+    shell: /bin/bash
+    append: yes
+    createhome: yes
+    home: /home/{{ deploy_user }}
+  become: yes
+
+- name: BASE > Allow {{ deploy_user }} sudo without password
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: ALL"
+    validate: visudo -cf %s
+  become: yes
+
+- name: BASE > Create folder /home/{{ deploy_user }}/.ssh
+  file:
+    path: /home/{{ deploy_user }}/.ssh
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  become: yes
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: Include tasks Nginx trên Ubuntu 20.04
+  include_tasks: ubuntu.yml
+  when: "'Ubuntu' in os_release.stdout and '22.04' in os_release.stdout"
+
+- name: Include tasks Nginx trên Amazon Linux 2
+  include_tasks: amazon.yml
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"
+
+- name: BASE > Setting PAM limits
+  pam_limits:
+    domain: "*"
+    limit_type: "-"
+    limit_item: nofile
+    value: "{{ base_maxopenfile | string }}"
+    use_max: yes
+  become: yes
+
+- name: BASE > Reload system settings after config PAM limits
+  shell: sysctl --system
+  become: yes
+
+- name: BASE > Set timezone to {{ base_timezone }}
+  timezone:
+    name: "{{ base_timezone }}"
+  become: yes
+
+- name: BASE > Check datetime on server
+  command: timedatectl
+  register: datetime_status
+- debug: var=datetime_status.stdout_lines

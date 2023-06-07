@@ -1,0 +1,11 @@
+env: prod
+full_env: production
+
+# Basic Authen for NGINX
+BASIC_AUTH_USERNAME: ""
+BASIC_AUTH_PASSWORD: ""
+
+# Database Name, User & Password
+APP_DB_NAME: ""
+APP_DB_USER: ""
+APP_DB_PASSWORD: ""

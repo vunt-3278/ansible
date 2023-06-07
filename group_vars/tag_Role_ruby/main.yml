@@ -1,0 +1,7 @@
+type: ruby
+
+# Roles/nginx
+app_path: /usr/local/rails_app/
+app_path_project: "{{ app_path }}{{ project }}"
+
+server_unix: //{{ app_path_project }}/shared/tmp/sockets/puma.sock

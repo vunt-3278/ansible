@@ -1,0 +1,9 @@
+type: php
+
+# Roles/nginx
+server_unix: /var/run/php/php{{ php_version }}-fpm.sock
+app_path_project: /var/www/{{ project }}
+
+# Roles/php-fpm
+php_version: 7.4
+php_repo: ppa:ondrej/php

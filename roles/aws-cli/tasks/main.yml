@@ -1,0 +1,30 @@
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: Include tasks aws-cli trên Ubuntu 20.04
+  include_tasks: ubuntu.yml
+  when: "'Ubuntu' in os_release.stdout and '20.04' in os_release.stdout"
+
+- name: Include tasks aws-cli trên Amazon Linux 2
+  include_tasks: amazon.yml
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"
+
+- name: AWS-CLI > Install awscli via pip3
+  pip:
+    executable: pip3
+    name: awscli
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: AWS-CLI > Upgrade awscli via pip3
+  command: pip3 install --upgrade awscli
+  become: yes
+
+- name: AWS-CLI > Check version awscli
+  command: aws --version
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_flags: -i
+  register: awscli_ver
+- debug: var=awscli_ver.stdout

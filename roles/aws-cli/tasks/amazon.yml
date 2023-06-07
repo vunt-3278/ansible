@@ -1,0 +1,5 @@
+- name: AWS-CLI > Install awscli via yum
+  yum:
+    name: awscli
+    state: present
+  become: yes

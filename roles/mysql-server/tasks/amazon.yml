@@ -1,0 +1,118 @@
+- name: Install MySQL repository
+  yum:
+    name: "https://repo.mysql.com/mysql{{ mysql_version_amazon }}-community-release-el7-5.noarch.rpm"
+    state: present
+  become: yes
+
+- name: MYSQL > Instal MySQL
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ base_mysql_packet_amazon }}"
+  become: yes
+
+- name: Install pymysql
+  pip:
+    name: pymysql
+  become: yes
+
+- name: MYSQL > Create folder conf.d if it not exist
+  file:
+    path: "{{ mysql_conf_dir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: "0755"
+  become: yes
+
+- name: MYSQL > Create log folder
+  file:
+    path: /var/log/mysql
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: "0755"
+  become: yes
+
+- name: MYSQL > Create datadir if it not exist
+  file:
+    path: "{{ mysql_data_dir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: "0755"
+  become: yes
+
+- name: MYSQL > Get MySQL version
+  shell: "mysql --version"
+  register: mysql_cli_version
+  changed_when: false
+  check_mode: false
+- debug: var=mysql_cli_version.stdout_lines
+
+- name: MYSQL > Update file my.cnf
+  template:
+    src: my.cnf.j2
+    dest: "{{ mysql_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    force: "{{ overwrite_global_mycnf }}"
+  become: yes
+
+- name: MYSQL > Update file .my.cnf
+  template:
+    src: .my.cnf.j2
+    dest: "/root/.my.cnf"
+    owner: root
+    group: root
+    mode: "0644"
+    force: "{{ overwrite_global_mycnf }}"
+  become: yes
+
+- name: MYSQL > Restart service
+  service:
+    name: mysqld
+    state: restarted
+  become: yes
+
+- name: Get Temporary Root Password
+  command: "grep 'temporary password' /var/log/mysql/error.log"
+  register: temp_password
+  # changed_when: false
+  become: yes
+
+- name: Get Root Password
+  set_fact:
+    password: "{{ temp_password.stdout.split() | last }}"
+
+- name: Update MySQL root password in .my.cnf
+  lineinfile:
+    dest: /root/.my.cnf
+    regexp: "^password="
+    line: "password={{ password }}"
+    state: present
+  become: yes
+
+- name: Change MySQL root password
+  shell: 'mysql -u root -p''{{ password }}'' --connect-expired-password -e "ALTER USER ''root''@''localhost'' IDENTIFIED BY ''{{ password }}'';"'
+  register: password_change_result
+  changed_when: "'ALTER USER' in password_change_result.stdout"
+  become: yes
+
+- name: MYSQL > Create Database for Application
+  mysql_db:
+    name: "{{ APP_DB_NAME }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    state: present
+  become: yes
+
+- name: MYSQL > Add user for Database Application
+  mysql_user:
+    name: "{{ APP_DB_USER }}"
+    password: "{{ APP_DB_PASSWORD }}"
+    priv: "{{ APP_DB_NAME }}.*:ALL"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    state: present
+  no_log: true
+  become: yes

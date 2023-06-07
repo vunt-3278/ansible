@@ -1,0 +1,36 @@
+- name: PM2-PPA > Install pm2
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    version: "{{ pm2_version }}"
+  become: yes
+
+- name: PM2-PPA > Startup pm2
+  shell: bash -lc "sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u deploy --hp /home/deploy"
+  become: yes
+
+# Check version
+- name: PM2-PPA > Check pm2 version
+  shell: bash -lc "pm2 -v"
+  register: checkpm2ver
+  become_user: "{{ deploy_user }}"
+  become: yes
+- debug: var=checkpm2ver.stdout_lines
+
+- name: PM2-PPA > Install cross-env
+  npm:
+    name: cross-env
+    global: yes
+    production: yes
+    version: "{{ cross_env_version }}"
+  become: yes
+
+# Create path project
+- name: PM2-PPA > Create path project
+  file:
+    path: "{{ app_path_project }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  become: yes

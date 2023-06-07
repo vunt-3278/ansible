@@ -1,0 +1,10 @@
+#https://github.com/rvm/rvm1-ansible
+- name: Ruby-with-rmv > Install RVM
+  import_tasks: "rvm.yml"
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: Ruby-with-rmv > Install Ruby and Gems
+  import_tasks: "rubies.yml"
+  become_user: "{{ deploy_user }}"
+  become: yes

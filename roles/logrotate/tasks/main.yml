@@ -1,0 +1,13 @@
+- name: LOGROTATE > Setup logrotate for app
+  template:
+    src: "{{ item }}"
+    dest: /etc/logrotate.d/{{ item | regex_replace('.j2') }}
+    mode: 0644
+    group: root
+    owner: root
+  loop: "{{ [ 'rails-logrotate.conf.j2' if (ansible_play_name == 'tag_Role_ruby') else 'laravel-logrotate.conf.j2' ] | flatten(1) }}"
+  become: yes
+
+- name: LOGROTATE > Check the changes
+  shell: logrotate -v -f /etc/logrotate.conf
+  become: yes

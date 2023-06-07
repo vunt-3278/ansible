@@ -1,0 +1,41 @@
+# Get SSH Private & Public key for Deploy user
+- name: DISTRIBUTE-KEY > Copy {{ deploy_user }} private key
+  template:
+    src: .deploy-private-key.j2
+    dest: /home/{{ deploy_user }}/.ssh/id_rsa
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0400
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+- name: DISTRIBUTE-KEY > Copy {{ deploy_user }} public key
+  template:
+    src: .deploy-public-key.j2
+    dest: /home/{{ deploy_user }}/.ssh/authorized_keys
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0600
+  become_user: "{{ deploy_user }}"
+  become: yes
+
+# Git deploy-key for Backend (api, admin, worker)
+- name: DISTRIBUTE-KEY > Copy deploy-key for server
+  template:
+    src: .git-deploy-key.j2
+    dest: /home/{{ deploy_user }}/.ssh/git-deploy-key
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0400
+  become_user: '{{ deploy_user }}'
+  become: yes
+
+- name: DISTRIBUTE-KEY > Copy ssh_config for server
+  template:
+    src: ssh-config.j2
+    dest: ~/.ssh/config
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0600
+  become_user: '{{ deploy_user }}'
+  become: yes

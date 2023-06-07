@@ -1,0 +1,57 @@
+# Detect and install rubies
+- name: 4. RUBIES > Detect if rubies are installed
+  command: "{{ rvm_rvm }} {{ item }} do true"
+  changed_when: False
+  failed_when: False
+  loop: "{{ rvm_rubies }}"
+  register: detect_rubies
+- debug: msg="{{ item.item | default([]) }}"
+  loop: "{{ detect_rubies.results }}"
+
+- name: 4. RUBIES > Install rubies
+  command: "{{ rvm_rvm }} install {{ item.item }} {{ rvm_ruby_install_flags }}"
+  loop: "{{ detect_rubies.results }}"
+  register: ruby_version
+- debug: var=ruby_version.results
+
+- name: 4. RUBIES > Detect default ruby version
+  command: "{{ rvm_rvm }} alias list default"
+  changed_when: False
+  register: detect_default_ruby_version
+
+- name: 4. RUBIES > Select default ruby
+  command: "{{ rvm_rvm }} alias create default {{ rvm_default_ruby_version }}"
+  when: detect_default_ruby_version.stdout|default() == '' or
+    rvm_default_ruby_version not in detect_default_ruby_version.stdout
+
+# Install bundler
+- name: 5. BUNDLER > Detect installed RUBY patch number
+  shell: >
+    {{ rvm_rvm }} list strings | grep {{ item }} | tail -n 1
+  loop: "{{ rvm_rubies }}"
+  changed_when: False
+  register: ruby_patch
+  check_mode: no # Run in normal mode when in --check mode (http://docs.ansible.com/ansible/playbooks_checkmode.html)
+
+- debug: msg="{{ item.stdout_lines | default([]) }}"
+  loop: "{{ ruby_patch.results }}"
+
+- name: 5. BUNDLER > Install bundler if not installed
+  shell: >
+    {{ rvm_install_path }}/wrappers/{{ item.stdout }}/gem install bundler:{{ bundler_version }}
+  loop: "{{ ruby_patch.results }}"
+  register: bundler_install
+- debug: var=bundler_install.results
+
+# Detect & delete
+- name: 6. RUBIES > Detect if ruby version can be deleted
+  command: "{{ rvm_rvm }} {{ rvm_delete_ruby }} do true"
+  changed_when: False
+  failed_when: False
+  register: detect_delete_ruby
+  when: rvm_delete_ruby | bool
+
+- name: 6. RUBIES > Delete ruby version
+  command: "{{ rvm_rvm }} remove {{ rvm_delete_ruby }}"
+  changed_when: False
+  when: rvm_delete_ruby | bool and detect_delete_ruby.rc == 0

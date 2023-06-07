@@ -1,0 +1,36 @@
+# create path project & reload daemon
+- name: SIDEKIQ-WITH-RVM > Create path project
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  loop:
+    - "{{ app_path }}"
+    - "{{ app_path_project }}"
+    - "{{ app_path_project }}/releases"
+    - "{{ app_path_project }}/shared"
+    - "{{ app_path_project }}/shared/log"
+    - "{{ app_path_project }}/shared/config"
+    - "{{ app_path_project }}/shared/public"
+    - "{{ app_path_project }}/shared/public/system"
+    - "{{ app_path_project }}/shared/public/uploads"
+    - "{{ app_path_project }}/shared/public/assets"
+    - "{{ app_path_project }}/shared/tmp"
+    - "{{ app_path_project }}/shared/tmp/pids"
+    - "{{ app_path_project }}/shared/tmp/sockets"
+  become: yes
+
+- name: SIDEKIQ-WITH-RVM > Create sidekiq systemd service
+  template:
+    src: sidekiq.service.j2
+    dest: /etc/systemd/system/sidekiq.service
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0754
+  become: yes
+
+- name: SIDEKIQ-WITH-RVM > Reload daemon
+  systemd:
+    daemon_reload: yes
+  become: yes

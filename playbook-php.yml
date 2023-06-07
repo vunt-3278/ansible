@@ -1,0 +1,28 @@
+- hosts: tag_Role_php
+
+  become_method: sudo
+  gather_facts: yes
+
+  # pre_tasks:
+  #   - name: Check OS distribution condition
+  #     debug:
+  #       var: "{{ item }}"
+  #     loop:
+  #       - ansible_distribution
+  #       - ansible_distribution_version
+  #     failed_when:
+  #       - ansible_distribution != 'Ubuntu' or ansible_distribution_version != '22.04'
+
+  roles:
+    - base
+    - aws-cli
+    - hostname
+    - distribute-key
+    - nginx
+    - php-fpm
+    - redis
+    - npm-ppa
+    - yarn-ppa
+    - mysql-server
+    - mysql-client
+    - logrotate

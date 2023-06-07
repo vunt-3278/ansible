@@ -1,0 +1,7 @@
+# role/redis
+redis_url: http://download.redis.io/releases/redis-{{ redis_version }}.tar.gz
+redis_version: 6.2.0
+
+redis_dir: /etc/redis
+
+redis_user: redis

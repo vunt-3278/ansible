@@ -1,0 +1,58 @@
+mysql_version: 8.0
+mysql_version_amazon: 80
+base_mysql_packet:
+  - mysql-server-{{ mysql_version }}
+  - mysql-client-{{ mysql_version }}
+  - python3-mysqldb
+
+base_mysql_packet_amazon:
+  - mysql-server
+  - mysql-community-client
+  - mysql-connector-python
+
+overwrite_global_mycnf: true
+
+mysql_port: "3306"
+mysql_bind_address: "127.0.0.1"
+mysql_data_dir: /var/lib/mysql
+mysql_conf_dir: /etc/mysql/conf.d
+mysql_pid_file: /var/run/mysqld/mysqld.pid
+mysql_config_file: /etc/my.cnf
+mysql_socket: /var/run/mysqld/mysqld.sock
+mysql_log_error: /var/log/mysql/error.log
+
+character_set_server: utf8
+collation_server: utf8_unicode_ci
+
+# Memory setting
+mysql_key_buffer_size: "256M"
+mysql_max_allowed_packet: "64M"
+mysql_table_open_cache: "{{ ansible_processor_cores * ansible_processor_count * 5000 }}"
+mysql_table_open_cache_instances: "{{ ansible_processor_cores * ansible_processor_count * 2 }}"
+mysql_sort_buffer_size: "{% if ansible_memtotal_mb >= 16 * 1024 %}{{ 4 * 1024 * 1024 }}{% else %}{{ 256 * 1024 }}{% endif %}"
+mysql_read_buffer_size: "{% if ansible_memtotal_mb >= 16 * 1024 %}{{ 4 * 1024 * 1024 }}{% else %}{{ 128 * 1024 }}{% endif %}"
+mysql_read_rnd_buffer_size: "{% if ansible_memtotal_mb >= 16 * 1024 %}{{ 4 * 1024 * 1024 }}{% else %}{{ 256 * 1024 }}{% endif %}"
+mysql_myisam_sort_buffer_size: "64M"
+mysql_thread_cache_size: "{{ ansible_processor_cores * ansible_processor_count * 100 }}"
+
+mysql_max_connections: "{{ ansible_processor_cores * ansible_processor_count * 200 }}"
+mysql_tmp_table_size: "{% if ansible_memtotal_mb >= 16 * 1024 %}{{ 128 * 1024 * 1024 }}{% else %}{{ 16 * 1024 * 1024 }}{% endif %}"
+mysql_max_heap_table_size: "16M"
+mysql_group_concat_max_len: "1024"
+mysql_join_buffer_size: "{% if ansible_memtotal_mb >= 16 * 1024 %}{{ 4 * 1024 * 1024 }}{% else %}{{ 256 * 1024 }}{% endif %}"
+
+# InnoDB settings.
+mysql_innodb_file_per_table: "1"
+mysql_innodb_buffer_pool_size: "256M"
+mysql_innodb_log_file_size: "512M"
+mysql_innodb_log_buffer_size: "32M"
+mysql_innodb_flush_log_at_trx_commit: "1"
+mysql_innodb_lock_wait_timeout: "50"
+
+# Other settings.
+mysql_lower_case_table_names: "0"
+mysql_wait_timeout: "28800"
+mysql_event_scheduler_state: "OFF"
+
+# MySQL Dump
+mysql_mysqldump_max_allowed_packet: "64M"

@@ -1,0 +1,94 @@
+# - name: BASE > Install aptitude
+#   yum:
+#     name: aptitude
+#     state: present
+#   become: yes
+
+- name: BASE > Add the {{ deploy_user }} user
+  user:
+    name: "{{ deploy_user }}"
+    groups: adm
+    state: present
+    shell: /bin/bash
+    append: yes
+    createhome: yes
+    home: /home/{{ deploy_user }}
+  become: yes
+
+# - name: BASE > Allow {{ deploy_user }} sudo without password
+#   lineinfile:
+#     dest: /etc/sudoers
+#     state: present
+#     line: "{{ deploy_user }} ALL=(ALL) NOPASSWD: ALL"
+#     validate: visudo -cf %s
+#   become: yes
+
+# - name: BASE > Create folder /home/{{ deploy_user }}/.ssh
+#   file:
+#     path: /home/{{ deploy_user }}/.ssh
+#     state: directory
+#     owner: "{{ deploy_user }}"
+#     group: "{{ deploy_user }}"
+#     mode: 0700
+#   become: yes
+- name: BASE > Install epel packages
+  shell: amazon-linux-extras install epel -y
+  become: yes
+
+- name: BASE > Install fail2ban packages
+  yum:
+    name: fail2ban
+    state: latest
+    update_cache: yes
+  become: yes
+
+- name: BASE > Install python-pip packages
+  yum:
+    name: python-pip
+    state: present
+    # update_cache: yes
+  become: yes
+
+- name: BASE > Install base packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop: "{{ base_packages_amazon }}"
+  become: yes
+
+# - name: BASE > Setting PAM limits
+#   pam_limits:
+#     domain: "*"
+#     limit_type: "-"
+#     limit_item: nofile
+#     value: "{{ base_maxopenfile | string }}"
+#     use_max: yes
+#   become: yes
+
+- name: BASE > Install chrony service
+  yum:
+    name: chrony
+    state: present
+  become: yes
+
+- name: BASE > Enable chrony service
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+  become: yes
+
+- name: BASE > Check status service chrony
+  command: systemctl status chronyd
+  register: chrony_status
+- debug: var=chrony_status.stdout_lines
+# - name: BASE > Set timezone to {{ base_timezone }}
+#   timezone:
+#     name: "{{ base_timezone }}"
+#   become: yes
+
+# - name: BASE > Check datetime on server
+#   command: timedatectl
+#   register: datetime_status
+# - debug: var=datetime_status.stdout_lines

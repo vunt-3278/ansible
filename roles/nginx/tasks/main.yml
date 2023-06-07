@@ -1,0 +1,70 @@
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: Include tasks Nginx trên Ubuntu 20.04
+  include_tasks: ubuntu.yml
+  when: "'Ubuntu' in os_release.stdout and '22.04' in os_release.stdout"
+
+- name: Include tasks Nginx trên Amazon Linux 2
+  include_tasks: amazon.yml
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"
+
+- name: NGINX > Copy configuration files "nginx.conf"
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_dir }}/nginx.conf"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+
+- name: NGINX > Disable the default site
+  file:
+    path: "{{nginx_conf_dir}}/sites-enabled/default"
+    state: absent
+  become: yes
+
+- name: NGINX > Copy the {{ type }}-config file to sites-available
+  template:
+    src: "{{ type }}-config.conf.j2"
+    dest: "{{nginx_conf_dir}}/sites-available/default.conf"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+
+- name: NGINX > Create symbolic link to default
+  file:
+    src: "{{nginx_conf_dir}}/sites-available/default.conf"
+    dest: "{{ nginx_conf_dir }}/sites-enabled/default"
+    state: link
+  become: yes
+
+# Setting Basic Authen
+- name: NGINX > Install passlib
+  pip:
+    name: passlib
+  become: yes
+
+- name: NGINX > Setting Basic Authen
+  htpasswd:
+    path: /etc/nginx/.htpasswd
+    name: "{{ BASIC_AUTH_USERNAME }}"
+    password: "{{ BASIC_AUTH_PASSWORD }}"
+    owner: root
+    group: root
+    mode: 0640
+  become: yes
+
+- name: NGINX > Restart & Enable NGINX
+  service:
+    name: nginx
+    state: reloaded
+    enabled: yes
+  become: yes
+
+- name: NGINX > Check nginx status
+  shell: bash -lc "systemctl status nginx"
+  register: nginx_status
+- debug: var=nginx_status.stdout_lines

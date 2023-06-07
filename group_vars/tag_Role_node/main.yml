@@ -1,0 +1,6 @@
+type: node
+
+# Roles/nginx
+# Roles/pm2-ppa
+app_path_project: /var/www/{{ project }}
+proxy_port: 8000

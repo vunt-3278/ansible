@@ -1,0 +1,25 @@
+- name: Kiểm tra hệ điều hành
+  command: "cat /etc/os-release"
+  register: os_release
+
+- name: MySQL-Client > Install Mysql-client
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - mysql-community-client
+    - mysql-devel
+  become: yes
+  when: "'Amazon' in os_release.stdout and '2' in os_release.stdout"
+
+- name: MySQL-Client > Install Mysql-client
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - mysql-client
+    - libmysqlclient-dev
+  become: yes
+  when: "'Ubuntu' in os_release.stdout and '22.04' in os_release.stdout"

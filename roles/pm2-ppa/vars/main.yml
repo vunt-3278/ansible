@@ -1,0 +1,3 @@
+# Roles/pm2-ppa
+pm2_version: 5.1.0
+cross_env_version: 7.0.2

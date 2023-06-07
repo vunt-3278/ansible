@@ -1,0 +1,15 @@
+[Unit]
+Description = sidekiq daemon
+
+[Service]
+#The path to the application code root directory for execute start
+WorkingDirectory = {{ app_path_project }}/current
+
+ExecStart = /home/deploy/.rvm/bin/rvm default do bundle exec sidekiq -C {{ app_path_project }}/current/config/sidekiq.yml -e {{ full_env }}
+Restart = always
+Type = simple
+User = {{ deploy_user }}
+Group = {{ deploy_user }}
+
+[Install]
+WantedBy = multi-user.target
